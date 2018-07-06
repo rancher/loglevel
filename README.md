@@ -3,7 +3,7 @@ loglevel
 
 This binary is used to change the loglevel dynamically.
 
-Used with package: [github.com/leodotcloud/log/server](https://github.com/leodotcloud/log/server)
+Used with package: [github.com/rancher/log/server](https://github.com/rancher/log/server)
 
 ## Building
 
