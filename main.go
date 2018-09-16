@@ -14,6 +14,7 @@ import (
 
 var (
 	DefaultSocketLocation = "/tmp/log.sock"
+	VERSION               = "dev"
 )
 
 // Client structure is used to store the server info
@@ -24,9 +25,12 @@ type Client struct {
 
 func main() {
 	app := cli.NewApp()
+	app.Version = VERSION
+	app.Usage = "Dynamically change loglevel"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name: "set",
+			Name:  "set",
+			Usage: "Set loglevel (info, debug, error)",
 		},
 		cli.StringFlag{
 			Name:   "socket-location",
@@ -35,7 +39,11 @@ func main() {
 		},
 	}
 	app.Action = run
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func NewClient(c *cli.Context) *Client {
@@ -57,15 +65,22 @@ func NewClient(c *cli.Context) *Client {
 func run(c *cli.Context) error {
 	client := NewClient(c)
 	if c.String("set") != "" {
-		return client.setLogLevel(c.String("set"))
+		err := client.setLogLevel(c.String("set"))
+		if err != nil {
+			return fmt.Errorf("Error when setting loglevel: %s", err)
+		}
+		return nil
 	}
-
-	return client.getLogLevel()
+	err := client.getLogLevel()
+	if err != nil {
+		return fmt.Errorf("Error when getting loglevel: %s", err)
+	}
+	return nil
 }
 
 func (client *Client) setLogLevel(level string) error {
 	if level != "info" && level != "debug" && level != "error" {
-		return fmt.Errorf("invalid log level specified")
+		return fmt.Errorf("invalid log level specified (%s)", level)
 	}
 	response, err := client.httpc.Post("http://unix/v1/loglevel",
 		"application/x-www-form-urlencoded",
