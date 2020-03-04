@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -30,7 +32,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "set",
-			Usage: "Set loglevel (info, debug, error)",
+			Usage: "Set loglevel",
 		},
 		cli.StringFlag{
 			Name:   "socket-location",
@@ -79,14 +81,18 @@ func run(c *cli.Context) error {
 }
 
 func (client *Client) setLogLevel(level string) error {
-	if level != "info" && level != "debug" && level != "error" {
-		return fmt.Errorf("invalid log level specified (%s)", level)
-	}
 	response, err := client.httpc.Post("http://unix/v1/loglevel",
 		"application/x-www-form-urlencoded",
 		strings.NewReader(fmt.Sprintf("level=%v", level)))
 	if err != nil {
 		return err
+	}
+	if response.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return err
+		}
+		return errors.New(strings.TrimRight(string(body), "\n"))
 	}
 	io.Copy(os.Stdout, response.Body)
 	return nil
