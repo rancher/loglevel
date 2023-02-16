@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -88,13 +87,17 @@ func (client *Client) setLogLevel(level string) error {
 		return err
 	}
 	if response.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			return err
 		}
 		return errors.New(strings.TrimRight(string(body), "\n"))
 	}
-	io.Copy(os.Stdout, response.Body)
+	_, err = io.Copy(os.Stdout, response.Body)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -103,6 +106,10 @@ func (client *Client) getLogLevel() error {
 	if err != nil {
 		return err
 	}
-	io.Copy(os.Stdout, response.Body)
+	_, err = io.Copy(os.Stdout, response.Body)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
