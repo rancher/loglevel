@@ -1,4 +1,4 @@
-// Modified only to change the DefaultSocketLocation.
+// Modified by Acorn Labs
 
 package main
 

@@ -1,3 +1,4 @@
+# Modified by Acorn Labs
 .PHONY: build
 build:
 	mkdir -p bin
