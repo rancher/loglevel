@@ -1,3 +1,5 @@
+// Modified only to change the DefaultSocketLocation.
+
 package main
 
 import (
@@ -15,7 +17,7 @@ import (
 )
 
 var (
-	DefaultSocketLocation = "/tmp/log.sock"
+	DefaultSocketLocation = "\x00logserver" // \x00 is the null byte, which we need to use for abstract namespace sockets instead of @ for some reason
 	VERSION               = "dev"
 )
 

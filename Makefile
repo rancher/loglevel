@@ -1,15 +1,9 @@
-TARGETS := $(shell ls scripts)
-
-.dapper:
-	@echo Downloading dapper
-	@curl -sL https://releases.rancher.com/dapper/latest/dapper-`uname -s`-`uname -m` > .dapper.tmp
-	@@chmod +x .dapper.tmp
-	@./.dapper.tmp -v
-	@mv .dapper.tmp .dapper
-
-$(TARGETS): .dapper
-	./.dapper $@
-
-.DEFAULT_GOAL := ci
-
-.PHONY: $(TARGETS)
+.PHONY: build
+build:
+	mkdir -p bin
+	PLATFORM=$(shell uname)
+    ifeq ($(PLATFORM),"Darwin")
+      CGO_ENABLED=0 go build -ldflags "-extldflags -static -s" -o bin/loglevel
+    else
+      CGO_ENABLED=0 go build -o bin/loglevel
+    endif
